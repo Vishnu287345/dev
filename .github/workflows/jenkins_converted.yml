@@ -1,30 +1,40 @@
 name: .NET Pipeline (Conditional)
-true:
+
+on:
   push:
     branches:
-    - main
+      - main
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    - name: Restore dependencies (skip if no .csproj or .sln)
-      run: "if ls **/*.csproj **/*.sln 1> /dev/null 2>&1; then\n  echo \"Project/solution\
-        \ file found. Running restore...\"\n  dotnet restore\nelse\n  echo \"No .csproj\
-        \ or .sln file found. Skipping restore.\"\nfi\n"
-    - name: Build (skip if no .csproj or .sln)
-      run: "if ls **/*.csproj **/*.sln 1> /dev/null 2>&1; then\n  echo \"Project/solution\
-        \ file found. Running build...\"\n  dotnet build --configuration Release\n\
-        else\n  echo \"No .csproj or .sln file found. Skipping build.\"\nfi\n"
-    - name: Test (skip if no .csproj or .sln)
-      run: "if ls **/*.csproj **/*.sln 1> /dev/null 2>&1; then\n  echo \"Project/solution\
-        \ file found. Running tests...\"\n  dotnet test --no-build --verbosity normal\n\
-        else\n  echo \"No .csproj or .sln file found. Skipping tests.\"\nfi\n"
-'on':
-  push:
-    branches:
-    - main
-  pull_request:
-    branches:
-    - main
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Restore dependencies (skip if no .csproj or .sln)
+        run: |
+          if ls **/*.csproj **/*.sln 1> /dev/null 2>&1; then
+            echo "Project/solution file found. Running restore..."
+            dotnet restore
+          else
+            echo "No .csproj or .sln file found. Skipping restore."
+          fi
+
+      - name: Build (skip if no .csproj or .sln)
+        run: |
+          if ls **/*.csproj **/*.sln 1> /dev/null 2>&1; then
+            echo "Project/solution file found. Running build..."
+            dotnet build --configuration Release
+          else
+            echo "No .csproj or .sln file found. Skipping build."
+          fi
+
+      - name: Test (skip if no .csproj or .sln)
+        run: |
+          if ls **/*.csproj **/*.sln 1> /dev/null 2>&1; then
+            echo "Project/solution file found. Running tests..."
+            dotnet test --no-build --verbosity normal
+          else
+            echo "No .csproj or .sln file found. Skipping tests."
+          fi
