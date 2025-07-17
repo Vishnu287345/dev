@@ -1,26 +1,29 @@
-name: Smart Pipeline
+name: Smart CI
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+
 jobs:
-  build:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan
+
+  dotnet:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7..x'
-      - name: Restore dependencies
-        run: dotnet restore || echo 'Restore skipped'
-      - name: Build
-        run: dotnet build --configuration Release || echo 'Build failed/skipped'
-      - name: Test
-        run: dotnet test --no-build --verbosity normal || echo 'Tests failed/skipped'
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Terraform Init
-        run: terraform init || echo 'Terraform init skipped'
-      - name: Terraform Plan
-        run: terraform plan || echo 'Terraform plan skipped'
+          dotnet-version: '7.0.x'
+      - run: dotnet restore || echo 'restore skipped'
+      - run: dotnet build --configuration Release || echo 'build skipped'
+      - run: dotnet test --no-build --verbosity normal || echo 'tests skipped'
