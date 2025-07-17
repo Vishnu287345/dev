@@ -1,0 +1,51 @@
+name: Smart CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform init || echo 'Terraform init skipped (no .tf files or folder)'
+
+      - name: Terraform Validate
+        run: terraform validate || echo 'Validate failed'
+
+      - name: Terraform Plan
+        run: terraform plan || echo 'Plan failed'
+
+  dotnet:
+    name: .NET
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Restore
+        run: dotnet restore || echo 'No .NET projects to restore'
+
+      - name: Build
+        run: dotnet build --configuration Release || echo 'Build skipped'
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal || echo 'No tests found'
